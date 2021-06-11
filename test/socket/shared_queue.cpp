@@ -58,11 +58,11 @@ TEST_CASE("Shared queue", "[socket]") {
     auto requester = azmq::req_socket{ioc};
     requester.connect(queue_name);
     for (int request_num = 0; request_num < 10; request_num++) {
-      [[maybe_unused]] auto byte_sent = requester.send(boost::asio::buffer("Hello"));
+      requester.send(boost::asio::buffer("Do this thing"));
       azmq::message_vector reply{};
       requester.receive_more(reply, 0);
     }
-    [[maybe_unused]] auto byte_sent = requester.send(boost::asio::buffer("done"));
+    requester.send(boost::asio::buffer("All work done"));
   };
 
   auto rrworker = [](std::string const &queue_name) {
@@ -72,13 +72,13 @@ TEST_CASE("Shared queue", "[socket]") {
     while (1) {
       azmq::message_vector request{};
       rep.receive_more(request, 0);
-      if (request.size() == 1 && request.at(0) == boost::asio::buffer("done")) {
+      if (request.size() == 1 && request.at(0) == boost::asio::buffer("All work done")) {
         break;
       } else {
         auto timer = boost::asio::steady_timer(ioc);
-        timer.expires_after(std::chrono::milliseconds(20));
+        timer.expires_after(std::chrono::milliseconds(1));
         timer.wait();
-        rep.send("work done");
+        rep.send("I've done what you asked");
       }
     }
   };
@@ -103,14 +103,17 @@ TEST_CASE("Shared queue", "[socket]") {
 
   boost::asio::io_context broker_ioc{};
   auto broker = std::thread([&] { rrbroker(frontend_queue_name, backend_queue_name,broker_ioc); });
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-  std::this_thread::sleep_for(std::chrono::seconds(1));
   auto worker1 = std::thread([&] { rrworker(backend_queue_name); });
-  std::this_thread::sleep_for(std::chrono::seconds(1));
+  auto worker2 = std::thread([&] { rrworker(backend_queue_name); });
   auto client1 = std::thread([&] { rrclient(frontend_queue_name); });
+  auto client2 = std::thread([&] { rrclient(frontend_queue_name); });
 
   client1.join();
+  client2.join();
   worker1.join();
+  worker2.join();
 
   broker_ioc.stop();
   broker.join();
