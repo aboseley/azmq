@@ -12,6 +12,7 @@
 #include <catch2/catch.hpp>
 #include <array>
 #include <string>
+#include <thread>
 
 namespace {
 
@@ -155,6 +156,7 @@ TEST_CASE("REQ to ROUTER combination, synchronous", "[socket]") {
   REQUIRE(received_reply.at(0).string() == std::string{"foo"});
   REQUIRE(received_reply.at(1).string() == std::string{"bar"});
 }
+
 TEST_CASE("REQ to ROUTER combination, asynchronous", "[socket]") {
   boost::asio::io_context ioc{};
   auto sb = azmq::router_socket{ioc};
@@ -241,3 +243,4 @@ TEST_CASE("DEALER to ROUTER combination, synchronous", "[socket]") {
   REQUIRE(received_reply.at(1).string() == std::string{"foo"});
   REQUIRE(received_reply.at(2).string() == std::string{"bar"});
 }
+
