@@ -99,7 +99,7 @@ TEST_CASE("Shared queue", "[socket]") {
   };
 
   auto const backend_queue_name = std::string("inproc://backend_");
-  auto const frontend_queue_name = std::string("inproc://tmp/frontend_");
+  auto const frontend_queue_name = std::string("inproc://frontend_");
 
   boost::asio::io_context broker_ioc{};
   auto broker = std::thread([&] { rrbroker(frontend_queue_name, backend_queue_name,broker_ioc); });

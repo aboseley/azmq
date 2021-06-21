@@ -204,7 +204,6 @@ TEST_CASE("REQ to ROUTER combination, asynchronous", "[socket]") {
 
 TEST_CASE("DEALER to ROUTER combination, synchronous", "[socket]") {
   boost::asio::io_context ioc{};
-
   auto const mq_name = subj(BOOST_CURRENT_FUNCTION);
 
   auto sb = azmq::router_socket{ioc};
@@ -243,4 +242,5 @@ TEST_CASE("DEALER to ROUTER combination, synchronous", "[socket]") {
   REQUIRE(received_reply.at(1).string() == std::string{"foo"});
   REQUIRE(received_reply.at(2).string() == std::string{"bar"});
 }
+
 
