@@ -569,6 +569,9 @@ TEST_CASE( "Socket Monitor", "[socket]" ) {
         ios_m.run();
     });
 
+    // wait a moment for the monitor activities to start
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
     server->bind("tcp://127.0.0.1:9998");
     client->connect("tcp://127.0.0.1:9998");
 
